@@ -1,7 +1,7 @@
 // read sensor and send the reading over serial 
 
 int sensorPin = A0;   // connect sensor to analog pin (A0)
-int ledPin = 13       // digital pin 13 (testing with LED)
+int ledPin = 13;       // digital pin 13 (testing with LED)
 int sensorValue;      // variable for storing sensor reading
 
 void setup() {

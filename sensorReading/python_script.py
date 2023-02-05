@@ -30,7 +30,8 @@ def readSerial(COMport, baudrate, timestamp=False):
     plt.show()
 
     # create csv
-    with open(fileName, 'w', encoding='UTF8', newline='') as f:
+    # with open(fileName, 'w', encoding='utf-8',errors='ignore') as f:
+    with open(fileName, 'w') as f:
         writer = csv.writer(f)
         writer.writerows(rpm_data)
     print(f"Data has been written to {fileName}!")
