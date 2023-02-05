@@ -11,7 +11,7 @@ def readSerial(COMport, baudrate, timestamp=False):
     rpm_data = []
 
     while True:
-        data = ser.readline().decode().strip()
+        data = ser.readline().decode("utf-8").strip()
         print(type(data), data)
 
         if data and timestamp:
