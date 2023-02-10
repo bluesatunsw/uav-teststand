@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation 
 import collections
 import pandas as pd
+import os
 import csv
 
 class serialPlot:
@@ -35,8 +36,6 @@ class serialPlot:
         self.rpmValues.append(rpm)            # using float for 4 bytes rpm 
         self.forceValues.append(force)
 
-        # a0.set_data(range(self.maxLen), self.rpmValues)
-        # a1.set_data(range(self.maxLen, self.forceValues))
         a0.set_data(self.rpmValues, self.forceValues)
         # self.csvData.append([{"RPM": self.rpmValues[-1], "Thurst": self.forceValues[-1]}], ignore_index=True)
         new_row = pd.Series({"RPM": self.rpmValues[-1], "Thurst": self.forceValues[-1]})
@@ -59,15 +58,22 @@ class serialPlot:
             self.isReceiving = True                              # Now we have some raw data!!!
             print(self.serialData)
 
-            time.sleep(1000000)
-
     def close(self):
         self.running = False
         self.thread.join()
         self.serialConnection.flush()
         self.serialConnection.close()
         print("Exited....")
-        self.csvData.to_csv('./data.csv')
+
+        path = os.getcwd() + "\\data.csv"
+        if os.path.isFile(path):
+            # append dataframe to csv file 
+            self.csvData.to_csv(path, mode='a', index=False, header=False)
+        else:
+            # else create csv file from dataframe 
+            self.csvData.to_csv(path)
+        # print message
+        print("Data appended successfully.")
 
 def main():
     comPort = "COM6"
