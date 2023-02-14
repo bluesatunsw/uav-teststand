@@ -1,4 +1,5 @@
 #define TEST_PIN A0
+#include <stdlib.h>
 
 void setup() {
   // put your setup code here, to run once:
@@ -7,11 +8,12 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  int value = analogRead(TEST_PIN);
-
-  byte* byteData = (byte*)(&value);
-  // Serial.write(byteData, 4);
-  // Serial.write(byteData, 4);
-  Serial.write(value);
+  if (Serial.available() > 0) {
+    ser = Serial.read()
+    if (ser == 0xF0F0) {
+      // begin motor testing 
+      Serial.println(ser, HEX);
+      delay(1000);
+    }
+  }
 }
