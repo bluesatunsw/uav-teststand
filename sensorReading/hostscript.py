@@ -10,7 +10,7 @@ import os
 import csv
 
 class serialPlot:
-    def __init__(self, comPort="COM5", baudrate =9600, numBytes = 4, max_entries = 20):
+    def __init__(self, comPort="COM5", baudrate =9600, numBytes = 4, max_entries = 100):
         self.port = comPort
         self.baud = baudrate
         self.serialData = bytearray(numBytes)           # create an array of numbyte size and initialise with null bytes (utf-16)
@@ -31,7 +31,7 @@ class serialPlot:
         except:
             print("Failed to connect with " + str(comPort)  + " at "+ str(baudrate) + " Baud.")
 
-    def update(self, frame, a0):
+    def update(self):
         # append value for rpm and thurst force 
         rpm, = struct.unpack("i", self.serialData[:4])
         force, = struct.unpack("i", self.serialData[4:])
@@ -46,35 +46,55 @@ class serialPlot:
         
     def readSerial(self):
         if self.thread == None:
-            self.thread = Thread(target=self.readThread)
-            self.thread.start()
-            # Wait until isReceiving live 
-            while self.isReceiving != True:
-                time.sleep(0.1)   
+            assert(self.startNullReceive==False)
+            mes = struct.pack("BB", 0xF0, 0xF0)
+            print(mes)
+            print(struct.pack("BB", 1, 2))
+            self.serialConnection.write(struct.pack('bb', 1, 2))
+            # bytes("s", 'utf-8')
+            # self.serialConnection.write(0)
 
-    def closeSignal(self):
-        if self.endNullReceive == True:
-            return True
-        return False
-    
+            while True:
+                # read up to len(b) bytes into bytearray b 
+                s = self.serialConnection.readline()
+                if s == "":
+                    print("What is worng!")
+                print(s)
+                time.sleep(.5)
+            # print(rbyte)
+
+
+            # self.thread = Thread(target=self.readThread)
+            # self.thread.start()
+            # # Wait until isReceiving live 
+            # while self.isReceiving != True:
+            #     time.sleep(0.1)   
+
+
     def readThread(self):
-        self.serialConnection.write(0xF0F0)
-        time.sleep(1)           # time for retrieving data 
+        print("readThread!")
         self.serialConnection.flushInput()
+
+        time.sleep(1)           # time for retrieving data 
+
         while (self.running):
+
+            print("Running!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            self.serialConnection.readinto(self.serialData)
+            print(self.serialData)
             # read up to len(b) bytes into bytearray b 
             self.serialConnection.readinto(self.serialData)
             if self.startNullReceive == True:
                 # this will avoid storing the useless nulls 
                 self.isReceiving = True
-            if bytes(self.serialData) == 0x00:
+            if bytes(self.serialData) == 0x0000:
+                print("I got null!")
                 if self.startNullReceive == False:
+                    print("Start receiving!!!")
                     self.startNullReceive = True
                 elif self.endNullReceive == False:
                     self.endNullReceive = True
                 
-            print(self.serialData)
-
     def close(self):
         self.running = False
         self.thread.join()
@@ -94,65 +114,27 @@ class serialPlot:
 
 def main():
     comPort = "COM5"
-    baudrate = 18600
-    numBytes = 8                
-    max_entries = 10
+    baudrate = 115200
+    numBytes = 2                
+    max_entries = 100
     ser = serialPlot(comPort, baudrate, numBytes,max_entries)
     ser.readSerial()
-    # strat plot 
-    fig = plt.figure()
-    min_rpm = 0
-    max_rpm = 2000
-    min_thurst = 0
-    max_thurst = 2000
-    ax = plt.axes(xlim=(min_rpm, max_rpm), ylim=(min_thurst, max_thurst))
-    ax.set_title("RPM vs Thurst Force produced")
-    ax.set_xlabel("RPM values")
-    ax.set_ylabel("Force produced")
 
-    line = ax.plot([], [])
-    anim = animation.FuncAnimation(fig, ser.update, fargs=(line), interval=30)
-    plt.show()
-    ser.close()
+    # strat plot 
+    # fig = plt.figure()
+    # min_rpm = 0
+    # max_rpm = 2000
+    # min_thurst = 0
+    # max_thurst = 2000
+    # ax = plt.axes(xlim=(min_rpm, max_rpm), ylim=(min_thurst, max_thurst))
+    # ax.set_title("RPM vs Thurst Force produced")
+    # ax.set_xlabel("RPM values")
+    # ax.set_ylabel("Force produced")
+
+    # line = ax.plot([], [])
+    # anim = animation.FuncAnimation(fig, ser.update, fargs=(line), interval=30)
+    # plt.show()
+    # ser.close()
     
 if __name__ == "__main__":
     main()
-# def readSerial(COMport, baudrate, timestamp=False):
-#     fileName = "rpm-data.csv"
-#     file = open(fileName, "a+")      # append to existing file 
-#     print(f"{fileName} file is created")
-#     ser = serial.Serial(COMport, baudrate, timeout=1)
-#     time.sleep(2)
-#     writer = csv.writer(file, delimiter=",")
-#     rpm_data = []
-
-#     while True:
-#         data = ser.readline().decode("utf-8").strip()
-#         print(type(data), data)
-
-#         if data and timestamp:
-#             timestamp = time.strftime('%H:%M:%S')
-#             print(f"{timestamp} >> {data}")
-#         elif data:
-#             print(data)
-#         rpm_data.append(data)
-#     ser.close()
-
-    # # plot the data
-    # plt.plot(rpm_data)
-    # plt.xlabel("Time")
-    # plt.ylabel("Sensor Reading")
-    # plt.title("Sensor reading vs Time")
-
-    # # Save the image 
-    # plt.savefig('pwmsignal.png')
-
-    # plt.show()
-
-    # create csv
-    # with open(fileName, 'w', encoding='utf-8',errors='ignore') as f:
-    # with open(fileName, 'w') as f:
-    #     writer = csv.writer(f)
-    #     writer.writerows(rpm_data)
-    # print(f"Data has been written to {fileName}!")
-    # file.close()
