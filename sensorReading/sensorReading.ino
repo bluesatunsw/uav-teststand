@@ -3,6 +3,8 @@
 int sensorPin = A0;   // connect sensor to analog pin (A0)
 int ledPin = 13;       // digital pin 13 (testing with LED)
 int sensorValue;      // variable for storing sensor reading
+String label = "RPM";
+bool printlabel = true;
 
 void setup() {
   pinMode(ledPin, OUTPUT);
@@ -11,6 +13,11 @@ void setup() {
 }
 
 void loop() {
+  while (printlabel) {
+    Serial.println(label);
+    printlabel = false;
+  }
+
   sensorValue = analogRead(sensorPin);  // read sensor value
   Serial.println(sensorValue);          // output reading to serial monitor
   if (sensorValue < 500) {
