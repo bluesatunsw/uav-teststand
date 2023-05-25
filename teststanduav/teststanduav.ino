@@ -1,9 +1,9 @@
 #include <Servo.h>
 
 Servo ESC;     // create servo object to control the ESC
-#define ESC_PIN 12
+#define ESC_PIN 26
 #define RPM_PIN 6
-#define LOAD_PIN 7
+#define LOAD_PIN 8
 #define RECORD_TIME 2 
 #define NUM_TARGET_SPEEDS 10
 #define NUM_SAMPLES 3
@@ -11,7 +11,7 @@ Servo ESC;     // create servo object to control the ESC
 void setup() {
   pinMode(RPM_PIN, INPUT);
   pinMode(LOAD_PIN, INPUT);
-  pinMode(8, INPUT);
+  pinMode(ESC_PIN, INPUT);//pinMode(8, INPUT);
   // put your setup code here, to run once:
   ESC.attach(ESC_PIN);                    
   ESC.writeMicroseconds(1500);
